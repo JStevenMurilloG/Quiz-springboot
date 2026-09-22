@@ -1,0 +1,1583 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font:
+          14px -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: #faf9f5;
+        color: #141413;
+      }
+
+      img {
+        max-width: 100%;
+      }
+
+      [hidden]:not([hidden="until-found" i]) {
+        display: none !important;
+      }
+    </style>
+  </head>
+
+  <body>
+    <title>Repaso Spring Boot</title>
+    <meta
+      name="description"
+      content="GuÃa de repaso de backend con Spring Boot para aprendices ADSO"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <style>
+      :root {
+        --bg: #f4f6f2;
+        --surface: #ffffff;
+        --ink: #18221d;
+        --ink-2: #4a5751;
+        --line: #dce3dd;
+        --accent: #2e7a4c;
+        --accent-soft: #e2f0e6;
+        --warn: #9a5b0b;
+        --warn-soft: #fcf1df;
+        --tip: #1f5f8b;
+        --tip-soft: #e3eef6;
+        --code-bg: #17201c;
+        --code-ink: #e4ebe6;
+        --jwt-h: #c2410c;
+        --jwt-p: #7c3aed;
+        --jwt-s: #0e7490;
+        --font-d: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+        --font-b: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+        --font-m:
+          "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          color-scheme: dark;
+          --bg: #111714;
+          --surface: #18201c;
+          --ink: #e6ece8;
+          --ink-2: #a3b1a9;
+          --line: #2a3530;
+          --accent: #6ccb91;
+          --accent-soft: #1d3326;
+          --warn: #e8b04e;
+          --warn-soft: #33280f;
+          --tip: #7db8e3;
+          --tip-soft: #172a38;
+          --code-bg: #0b100d;
+          --code-ink: #e4ebe6;
+          --jwt-h: #fb923c;
+          --jwt-p: #a78bfa;
+          --jwt-s: #22d3ee;
+        }
+      }
+
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #111714;
+        --surface: #18201c;
+        --ink: #e6ece8;
+        --ink-2: #a3b1a9;
+        --line: #2a3530;
+        --accent: #6ccb91;
+        --accent-soft: #1d3326;
+        --warn: #e8b04e;
+        --warn-soft: #33280f;
+        --tip: #7db8e3;
+        --tip-soft: #172a38;
+        --code-bg: #0b100d;
+        --code-ink: #e4ebe6;
+        --jwt-h: #fb923c;
+        --jwt-p: #a78bfa;
+        --jwt-s: #22d3ee;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--font-b);
+        font-size: 16px;
+        line-height: 1.65;
+        padding-inline: 16px;
+      }
+
+      a {
+        color: var(--accent);
+      }
+
+      :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 3px;
+      }
+
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 48px;
+        padding-block: 32px 80px;
+      }
+
+      @media (max-width: 900px) {
+        .wrap {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 24px;
+        }
+      }
+
+      /* TOC */
+      nav.toc {
+        position: sticky;
+        top: calc(env(safe-area-inset-top, 0px) + 24px);
+        align-self: start;
+        max-height: calc(100vh - 48px);
+        overflow: auto;
+        font-size: 14px;
+      }
+
+      nav.toc h2 {
+        font-family: var(--font-d);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--ink-2);
+        margin: 0 0 8px;
+      }
+
+      nav.toc ol {
+        list-style: none;
+        margin: 0 0 16px;
+        padding: 0;
+      }
+
+      nav.toc li a {
+        display: flex;
+        gap: 8px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      nav.toc li a:hover {
+        background: var(--accent-soft);
+      }
+
+      nav.toc li a span {
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: var(--ink-2);
+        min-width: 1.6em;
+        padding-top: 2px;
+      }
+
+      nav.toc .blk {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        font-weight: 600;
+        margin: 12px 8px 2px;
+      }
+
+      @media (max-width: 900px) {
+        nav.toc {
+          position: static;
+          max-height: none;
+          background: var(--surface);
+          border: 1px solid var(--line);
+          border-radius: 10px;
+          padding: 12px;
+        }
+
+        nav.toc details summary {
+          cursor: pointer;
+          font-family: var(--font-d);
+          font-weight: 700;
+        }
+      }
+
+      @media (min-width: 901px) {
+        nav.toc details summary {
+          display: none;
+        }
+      }
+
+      /* Header */
+      header.hero {
+        padding-block: 8px 24px;
+        border-bottom: 2px solid var(--ink);
+        margin-bottom: 8px;
+      }
+
+      .eyebrow {
+        font-family: var(--font-m);
+        font-size: 12px;
+        letter-spacing: 0.06em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+
+      h1 {
+        font-family: var(--font-d);
+        font-weight: 800;
+        font-size: clamp(34px, 6vw, 56px);
+        line-height: 1.02;
+        letter-spacing: -0.02em;
+        margin: 8px 0 12px;
+        text-wrap: balance;
+      }
+
+      .lede {
+        max-width: 64ch;
+        color: var(--ink-2);
+        margin: 0 0 16px;
+      }
+
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-m);
+        font-size: 13px;
+      }
+
+      .flow .n {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        padding: 4px 10px;
+        border-radius: 999px;
+      }
+
+      .flow .n.hl {
+        background: var(--accent);
+        color: var(--bg);
+        border-color: var(--accent);
+      }
+
+      .flow .ar {
+        color: var(--ink-2);
+      }
+
+      /* Sections */
+      .block-title {
+        font-family: var(--font-d);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--accent);
+        margin: 56px 0 0;
+        padding-top: 8px;
+        border-top: 1px solid var(--line);
+      }
+
+      section.topic {
+        padding-block: 28px 8px;
+        scroll-margin-top: 16px;
+      }
+
+      section.topic > h2 {
+        font-family: var(--font-d);
+        font-weight: 700;
+        font-size: clamp(24px, 3.4vw, 32px);
+        line-height: 1.15;
+        letter-spacing: -0.01em;
+        margin: 0 0 12px;
+        display: flex;
+        gap: 14px;
+        align-items: baseline;
+        text-wrap: balance;
+      }
+
+      section.topic > h2 .num {
+        font-family: var(--font-m);
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent);
+        border: 1.5px solid var(--accent);
+        border-radius: 6px;
+        padding: 1px 7px;
+        flex: none;
+        transform: translateY(-4px);
+      }
+
+      section.topic p,
+      section.topic ul,
+      section.topic ol {
+        max-width: 68ch;
+      }
+
+      section.topic li {
+        margin-bottom: 4px;
+      }
+
+      h3 {
+        font-family: var(--font-d);
+        font-size: 18px;
+        margin: 24px 0 8px;
+      }
+
+      code {
+        font-family: var(--font-m);
+        font-size: 0.88em;
+        background: var(--accent-soft);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+
+      strong {
+        font-weight: 600;
+      }
+
+      pre {
+        background: var(--code-bg);
+        color: var(--code-ink);
+        border-radius: 10px;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-family: var(--font-m);
+        font-size: 13.5px;
+        line-height: 1.6;
+        margin: 14px 0;
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+        font-size: inherit;
+        color: inherit;
+      }
+
+      .file {
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: var(--ink-2);
+        margin: 16px 0 -8px;
+      }
+
+      .hljs-keyword,
+      .hljs-built_in {
+        color: #f0a868;
+      }
+
+      .hljs-meta {
+        color: #8fd694;
+      }
+
+      .hljs-string {
+        color: #e6d28a;
+      }
+
+      .hljs-comment {
+        color: #7f9087;
+        font-style: italic;
+      }
+
+      .hljs-title,
+      .hljs-title.class_,
+      .hljs-title.function_ {
+        color: #8ec5f0;
+      }
+
+      .hljs-type {
+        color: #c6a6f4;
+      }
+
+      .hljs-number,
+      .hljs-literal {
+        color: #f28b82;
+      }
+
+      .hljs-attr,
+      .hljs-variable {
+        color: #9ed9d0;
+      }
+
+      .callout {
+        border-radius: 10px;
+        padding: 12px 16px;
+        margin: 16px 0;
+        max-width: 72ch;
+        font-size: 15px;
+      }
+
+      .callout b.lbl {
+        display: block;
+        font-family: var(--font-d);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 2px;
+      }
+
+      .callout.warn {
+        background: var(--warn-soft);
+        color: var(--ink);
+      }
+
+      .callout.warn b.lbl {
+        color: var(--warn);
+      }
+
+      .callout.tip {
+        background: var(--tip-soft);
+      }
+
+      .callout.tip b.lbl {
+        color: var(--tip);
+      }
+
+      .callout p {
+        margin: 4px 0;
+      }
+
+      .tbl {
+        overflow-x: auto;
+        margin: 14px 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14.5px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        font-family: var(--font-d);
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ink-2);
+        background: var(--bg);
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td code {
+        white-space: nowrap;
+      }
+
+      .st {
+        font-family: var(--font-m);
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .s2 {
+        color: var(--accent);
+      }
+
+      .s4 {
+        color: var(--warn);
+      }
+
+      .s5 {
+        color: #c0392b;
+      }
+
+      /* Layers diagram */
+      .layers {
+        display: grid;
+        gap: 0;
+        max-width: 640px;
+        margin: 18px 0;
+      }
+
+      .layer {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 12px;
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        padding: 12px 14px;
+        border-radius: 10px;
+      }
+
+      .layer .nm {
+        font-family: var(--font-m);
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--accent);
+      }
+
+      .layer .ds {
+        font-size: 14px;
+        color: var(--ink-2);
+      }
+
+      .layer.ext {
+        background: transparent;
+        border-style: dashed;
+      }
+
+      .down {
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: var(--ink-2);
+        padding: 3px 0 3px 64px;
+      }
+
+      @media (max-width: 520px) {
+        .layer {
+          grid-template-columns: 1fr;
+          gap: 2px;
+        }
+
+        .down {
+          padding-left: 16px;
+        }
+      }
+
+      /* JWT */
+      .jwt {
+        font-family: var(--font-m);
+        font-size: 14px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 14px 16px;
+        word-break: break-all;
+        line-height: 1.7;
+      }
+
+      .jwt .h {
+        color: var(--jwt-h);
+      }
+
+      .jwt .p {
+        color: var(--jwt-p);
+      }
+
+      .jwt .s {
+        color: var(--jwt-s);
+      }
+
+      .jwt .d {
+        color: var(--ink);
+        font-weight: 700;
+      }
+
+      .jparts {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin: 12px 0;
+      }
+
+      @media (max-width: 700px) {
+        .jparts {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .jpart {
+        border-top: 3px solid;
+        padding: 10px 0 0;
+        font-size: 14px;
+      }
+
+      .jpart h4 {
+        margin: 0 0 4px;
+        font-family: var(--font-d);
+        font-size: 16px;
+      }
+
+      .jpart pre {
+        margin: 8px 0 0;
+        font-size: 12.5px;
+        padding: 10px 12px;
+      }
+
+      .jpart.h {
+        border-color: var(--jwt-h);
+      }
+
+      .jpart.h h4 {
+        color: var(--jwt-h);
+      }
+
+      .jpart.p {
+        border-color: var(--jwt-p);
+      }
+
+      .jpart.p h4 {
+        color: var(--jwt-p);
+      }
+
+      .jpart.s {
+        border-color: var(--jwt-s);
+      }
+
+      .jpart.s h4 {
+        color: var(--jwt-s);
+      }
+
+      .seq {
+        list-style: none;
+        padding: 0;
+        margin: 16px 0;
+        max-width: 72ch;
+        counter-reset: s;
+      }
+
+      .seq li {
+        counter-increment: s;
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px dashed var(--line);
+      }
+
+      .seq li::before {
+        content: counter(s);
+        font-family: var(--font-m);
+        font-weight: 600;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--accent);
+        color: var(--bg);
+        display: grid;
+        place-items: center;
+        font-size: 13px;
+      }
+
+      .seq .who {
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: var(--ink-2);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Filter chain */
+      .chain {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: stretch;
+        gap: 0;
+        margin: 18px 0;
+        font-size: 13.5px;
+      }
+
+      .chain .f {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 12px;
+        max-width: 180px;
+      }
+
+      .chain .f b {
+        display: block;
+        font-family: var(--font-m);
+        font-size: 12.5px;
+        color: var(--ink);
+      }
+
+      .chain .f small {
+        color: var(--ink-2);
+        line-height: 1.35;
+        display: block;
+        margin-top: 2px;
+      }
+
+      .chain .f.me {
+        border: 2px solid var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .chain .f.end {
+        border-style: dashed;
+      }
+
+      .chain .a {
+        align-self: center;
+        padding: 0 6px;
+        color: var(--ink-2);
+        font-family: var(--font-m);
+      }
+
+      .chain .req {
+        align-self: center;
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: var(--ink-2);
+        padding-right: 6px;
+      }
+
+      .bounce {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 12px 0;
+        max-width: 720px;
+      }
+
+      @media (max-width: 600px) {
+        .bounce {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .bounce div {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 12px 14px;
+        font-size: 14.5px;
+      }
+
+      .bounce .st {
+        font-size: 22px;
+        display: block;
+      }
+
+      /* Quiz */
+      .quiz details {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        margin: 10px 0;
+        max-width: 760px;
+      }
+
+      .quiz summary {
+        cursor: pointer;
+        padding: 12px 16px;
+        font-weight: 500;
+        list-style: none;
+        display: grid;
+        grid-template-columns: 32px 1fr 20px;
+        gap: 8px;
+        align-items: start;
+      }
+
+      .quiz summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .quiz summary .q {
+        font-family: var(--font-m);
+        color: var(--accent);
+        font-weight: 600;
+      }
+
+      .quiz summary::after {
+        content: "+";
+        font-family: var(--font-m);
+        color: var(--ink-2);
+        font-size: 18px;
+        line-height: 1.2;
+      }
+
+      .quiz details[open] summary::after {
+        content: "â€“";
+      }
+
+      .quiz .ans {
+        padding: 0 16px 14px 56px;
+        color: var(--ink-2);
+        font-size: 15px;
+      }
+
+      .quiz .ans p {
+        margin: 4px 0;
+      }
+
+      .qtools {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 8px 0;
+      }
+
+      button {
+        font: inherit;
+        font-size: 14px;
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        border-color: var(--accent);
+      }
+
+      footer {
+        margin-top: 64px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+        color: var(--ink-2);
+        font-size: 14px;
+      }
+    </style>
+
+    <div class="wrap">
+      <nav class="toc" aria-label="Contenido">
+        <details open id="toc-details">
+          <summary>Contenido de la guÃa</summary>
+          <h2>Contenido</h2>
+          <div class="blk">Fundamentos</div>
+          <ol>
+            <li>
+              <a href="#t1"><span>01</span>Â¿QuÃ© es Spring Boot?</a>
+            </li>
+            <li>
+              <a href="#t2"><span>02</span>Arquitectura en capas</a>
+            </li>
+            <li>
+              <a href="#t3"><span>03</span>IoC e inyecciÃ³n</a>
+            </li>
+            <li>
+              <a href="#t4"><span>04</span>application.properties</a>
+            </li>
+          </ol>
+          <div class="blk">API REST</div>
+          <ol>
+            <li>
+              <a href="#t5"><span>05</span>Controladores REST</a>
+            </li>
+            <li>
+              <a href="#t6"><span>06</span>HTTP y cÃ³digos</a>
+            </li>
+            <li>
+              <a href="#t7"><span>07</span>DTOs</a>
+            </li>
+          </ol>
+          <div class="blk">Persistencia JPA</div>
+          <ol>
+            <li>
+              <a href="#t8"><span>08</span>Entidades</a>
+            </li>
+            <li>
+              <a href="#t9"><span>09</span>JpaRepository</a>
+            </li>
+            <li>
+              <a href="#t10"><span>10</span>Relaciones</a>
+            </li>
+          </ol>
+          <div class="blk">Calidad</div>
+          <ol>
+            <li>
+              <a href="#t11"><span>11</span>Validaciones</a>
+            </li>
+            <li>
+              <a href="#t12"><span>12</span>Manejo de errores</a>
+            </li>
+          </ol>
+          <div class="blk">Seguridad</div>
+          <ol>
+            <li>
+              <a href="#t13"><span>13</span>Spring Security + JWT</a>
+            </li>
+          </ol>
+          <div class="blk">Repaso final</div>
+          <ol>
+            <li>
+              <a href="#resumen"><span>âœ“</span>Tabla de anotaciones</a>
+            </li>
+            <li>
+              <a href="#quiz"><span>?</span>AutoevaluaciÃ³n</a>
+            </li>
+          </ol>
+        </details>
+      </nav>
+
+      <main>
+        <header class="hero">
+          <div class="eyebrow">ADSO Â· Backend Â· GuÃa de repaso</div>
+          <h1>Repaso Spring Boot</h1>
+          <div class="flow" aria-label="Recorrido de una peticiÃ³n">
+            <span class="n">Cliente</span><span class="ar">â†’</span
+            ><span class="n">Filtros (Security)</span><span class="ar">â†’</span
+            ><span class="n hl">Controller</span><span class="ar">â†’</span
+            ><span class="n hl">Service</span><span class="ar">â†’</span
+            ><span class="n hl">Repository</span><span class="ar">â†’</span
+            ><span class="n">Base de datos</span>
+          </div>
+        </header>
+
+        <!-- BLOQUE 1 -->
+        <div class="block-title">Bloque 1 Â· Fundamentos</div>
+
+        <section class="topic" id="t1">
+          <h2><span class="num">01</span>Â¿QuÃ© es Spring Boot?</h2>
+          <p>
+            <strong>Spring</strong> es un framework de Java para construir
+            aplicaciones empresariales. <strong>Spring Boot</strong> es una capa
+            encima de Spring que elimina la configuraciÃ³n manual: trae un
+            servidor embebido (Tomcat), configura cosas automÃ¡ticamente y te
+            deja arrancar un proyecto en minutos.
+          </p>
+          <ul>
+            <li>
+              <strong>AutoconfiguraciÃ³n:</strong> Boot mira quÃ© dependencias
+              tienes y configura lo necesario. Si agregas el driver de
+              PostgreSQL y JPA, configura la conexiÃ³n solo.
+            </li>
+            <li>
+              <strong>Starters:</strong> paquetes de dependencias agrupadas.
+              Ejemplos: <code>spring-boot-starter-web</code> (API REST),
+              <code>spring-boot-starter-data-jpa</code> (base de datos),
+              <code>spring-boot-starter-validation</code>,
+              <code>spring-boot-starter-security</code>.
+            </li>
+            <li>
+              <strong>Servidor embebido:</strong> no necesitas instalar Tomcat;
+              la app corre con <code>mvn spring-boot:run</code> o como un
+              <code>.jar</code>.
+            </li>
+          </ul>
+          <p class="file">TiendaApplication.java</p>
+          <pre><code class="language-java">@SpringBootApplication  // = @Configuration + @EnableAutoConfiguration + @ComponentScan
+public class TiendaApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(TiendaApplication.class, args);
+    }
+}</code></pre>
+          <div class="callout warn">
+            <b class="lbl">âš Error comÃºn</b>
+            <p>
+              <code>@ComponentScan</code> solo busca clases en el paquete de la
+              clase principal <em>y sus subpaquetes</em>. Si creas un controller
+              en un paquete "hermano" o por fuera, Spring no lo encuentra y el
+              endpoint da 404.
+            </p>
+          </div>
+        </section>
+
+        <section class="topic" id="t2">
+          <h2><span class="num">02</span>Arquitectura en capas</h2>
+          <p>
+            Cada capa tiene <strong>una sola responsabilidad</strong> y solo
+            habla con la capa de abajo. AsÃ el cÃ³digo es mÃ¡s fÃ¡cil de probar,
+            mantener y cambiar.
+          </p>
+          <div class="layers" role="list">
+            <div class="layer ext" role="listitem">
+              <span class="nm">Cliente</span
+              ><span class="ds"
+                >Postman, Angular, app mÃ³vil. EnvÃa peticiones HTTP con
+                JSON.</span
+              >
+            </div>
+            <div class="down">â†“ HTTP + JSON</div>
+            <div class="layer" role="listitem">
+              <span class="nm">Controller</span
+              ><span class="ds"
+                >Recibe la peticiÃ³n, valida la entrada y devuelve la respuesta
+                HTTP. <strong>No tiene lÃ³gica de negocio.</strong></span
+              >
+            </div>
+            <div class="down">â†“ DTO</div>
+            <div class="layer" role="listitem">
+              <span class="nm">Service</span
+              ><span class="ds"
+                >LÃ³gica de negocio: reglas, cÃ¡lculos, validaciones del dominio
+                ("no se puede vender sin stock").</span
+              >
+            </div>
+            <div class="down">â†“ Entidad</div>
+            <div class="layer" role="listitem">
+              <span class="nm">Repository</span
+              ><span class="ds"
+                >Acceso a datos. Habla con la base de datos a travÃ©s de
+                JPA.</span
+              >
+            </div>
+            <div class="down">â†“ SQL (lo genera Hibernate)</div>
+            <div class="layer ext" role="listitem">
+              <span class="nm">Base de datos</span
+              ><span class="ds"
+                >MySQL / PostgreSQL. Tablas que representan a las
+                entidades.</span
+              >
+            </div>
+          </div>
+          <p>Estructura de paquetes tÃpica:</p>
+          <pre><code class="language-plaintext">com.sena.tienda
+â”œâ”€â”€ controller/   ProductoController.java
+â”œâ”€â”€ service/      ProductoService.java
+â”œâ”€â”€ repository/   ProductoRepository.java
+â”œâ”€â”€ model/        Producto.java, Categoria.java   (entidades)
+â”œâ”€â”€ dto/          ProductoRequest.java, ProductoResponse.java
+â””â”€â”€ exception/    GlobalExceptionHandler.java, RecursoNoEncontradoException.java</code></pre>
+        </section>
+
+        <section class="topic" id="t3">
+          <h2><span class="num">03</span>IoC e inyecciÃ³n de dependencias</h2>
+          <p>
+            <strong>InversiÃ³n de Control (IoC):</strong> tÃº no creas los
+            objetos con <code>new</code>; Spring los crea y los administra. A
+            esos objetos administrados se les llama <strong>beans</strong>, y
+            viven en el
+            <strong>contenedor de Spring</strong> (ApplicationContext).
+          </p>
+          <p>
+            <strong>InyecciÃ³n de dependencias (DI):</strong> cuando una clase
+            necesita otra, Spring se la "entrega" automÃ¡ticamente.
+          </p>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr>
+                  <th>AnotaciÃ³n</th>
+                  <th>Se usa en</th>
+                  <th>Para quÃ©</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>@Component</code></td>
+                  <td>Cualquier clase</td>
+                  <td>Bean genÃ©rico</td>
+                </tr>
+                <tr>
+                  <td><code>@Service</code></td>
+                  <td>Capa de servicio</td>
+                  <td>LÃ³gica de negocio</td>
+                </tr>
+                <tr>
+                  <td><code>@Repository</code></td>
+                  <td>Capa de datos</td>
+                  <td>Acceso a BD y traducciÃ³n de errores de BD</td>
+                </tr>
+                <tr>
+                  <td><code>@RestController</code></td>
+                  <td>Capa web</td>
+                  <td>
+                    <code>@Controller</code> + <code>@ResponseBody</code>:
+                    devuelve JSON
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="file">
+            ProductoService.java: inyecciÃ³n por constructor (la recomendada)
+          </p>
+          <pre><code class="language-java">@Service
+public class ProductoService {
+
+    private final ProductoRepository productoRepository; // final = no cambia
+
+    // Spring ve el constructor y le pasa el bean automÃ¡ticamente.
+    // Con un solo constructor, @Autowired no es necesario.
+    public ProductoService(ProductoRepository productoRepository) {
+        this.productoRepository = productoRepository;
+    }
+}</code></pre>
+          <div class="callout tip">
+            <b class="lbl"
+              >Â¿Por quÃ© constructor y no @Autowired en el atributo?</b
+            >
+            <p>
+              Permite usar <code>final</code> (la dependencia no se puede
+              cambiar), hace obvias las dependencias de la clase y facilita las
+              pruebas unitarias, porque puedes pasar un objeto falso en el
+              constructor. Con Lombok:
+              <code>@RequiredArgsConstructor</code> genera ese constructor por
+              ti.
+            </p>
+          </div>
+        </section>
+
+        <section class="topic" id="t4">
+          <h2><span class="num">04</span>application.properties</h2>
+          <p>
+            Archivo en <code>src/main/resources</code> donde se configura la app
+            sin tocar cÃ³digo.
+          </p>
+          <pre><code class="language-properties"># Puerto del servidor (por defecto 8080)
+server.port=8080
+
+# ConexiÃ³n a la base de datos
+spring.datasource.url=jdbc:postgresql://localhost:5432/tienda
+spring.datasource.username=postgres
+spring.datasource.password=admin
+
+# JPA / Hibernate
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true</code></pre>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr>
+                  <th><code>ddl-auto</code></th>
+                  <th>QuÃ© hace</th>
+                  <th>CuÃ¡ndo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>create</code></td>
+                  <td>Borra y crea las tablas en cada arranque</td>
+                  <td>Pruebas (Â¡pierdes los datos!)</td>
+                </tr>
+                <tr>
+                  <td><code>create-drop</code></td>
+                  <td>Crea al iniciar y borra al detener</td>
+                  <td>Tests</td>
+                </tr>
+                <tr>
+                  <td><code>update</code></td>
+                  <td>Crea o modifica tablas sin borrar datos</td>
+                  <td>Desarrollo</td>
+                </tr>
+                <tr>
+                  <td><code>validate</code></td>
+                  <td>
+                    Solo verifica que las tablas coincidan con las entidades
+                  </td>
+                  <td>ProducciÃ³n</td>
+                </tr>
+                <tr>
+                  <td><code>none</code></td>
+                  <td>No hace nada</td>
+                  <td>ProducciÃ³n con migraciones (Flyway)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>
+            La versiÃ³n <code>.yml</code> es lo mismo con otra sintaxis
+            (indentaciÃ³n en lugar de puntos).
+          </p>
+        </section>
+
+        <!-- BLOQUE 2 -->
+        <div class="block-title">Bloque 2 Â· API REST</div>
+
+        <section class="topic" id="t5">
+          <h2><span class="num">05</span>Controladores REST</h2>
+          <p>
+            Un controller expone <strong>endpoints</strong>: combinaciones de
+            mÃ©todo HTTP + ruta. ConvenciÃ³n REST: la ruta es un sustantivo en
+            plural (<code>/api/productos</code>), el verbo lo pone el mÃ©todo
+            HTTP.
+          </p>
+          <p class="file">ProductoController.java</p>
+          <pre><code class="language-java">@RestController
+@RequestMapping("/api/productos")          // ruta base para todo el controller
+public class ProductoController {
+
+    private final ProductoService service;
+
+    public ProductoController(ProductoService service) {
+        this.service = service;
+    }
+
+    @GetMapping                              // GET /api/productos
+    public List&lt;ProductoResponse&gt; listar() {
+        return service.listar();
+    }
+
+    @GetMapping("/{id}")                     // GET /api/productos/5
+    public ProductoResponse buscar(@PathVariable Long id) {
+        return service.buscarPorId(id);
+    }
+
+    @GetMapping("/buscar")                   // GET /api/productos/buscar?nombre=mouse
+    public List&lt;ProductoResponse&gt; porNombre(@RequestParam String nombre) {
+        return service.buscarPorNombre(nombre);
+    }
+
+    @PostMapping                             // POST /api/productos  (JSON en el body)
+    public ResponseEntity&lt;ProductoResponse&gt; crear(@Valid @RequestBody ProductoRequest req) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.crear(req));
+    }
+
+    @PutMapping("/{id}")                     // PUT /api/productos/5
+    public ProductoResponse actualizar(@PathVariable Long id,
+                                       @Valid @RequestBody ProductoRequest req) {
+        return service.actualizar(id, req);
+    }
+
+    @DeleteMapping("/{id}")                  // DELETE /api/productos/5
+    public ResponseEntity&lt;Void&gt; eliminar(@PathVariable Long id) {
+        service.eliminar(id);
+        return ResponseEntity.noContent().build();   // 204
+    }
+}</code></pre>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr>
+                  <th>AnotaciÃ³n</th>
+                  <th>Lee el dato desde</th>
+                  <th>Ejemplo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>@PathVariable</code></td>
+                  <td>La ruta</td>
+                  <td>
+                    <code>/productos/<b>5</b></code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>@RequestParam</code></td>
+                  <td>Query string (despuÃ©s de <code>?</code>)</td>
+                  <td>
+                    <code>/productos?nombre=<b>mouse</b></code>
+                  </td>
+                </tr>
+                <tr>
+                  <td><code>@RequestBody</code></td>
+                  <td>El cuerpo (JSON â†’ objeto Java)</td>
+                  <td><code>{"nombre":"Mouse","precio":45000}</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout warn">
+            <b class="lbl">âš Error comÃºn</b>
+            <p>
+              Olvidar <code>@RequestBody</code> en un POST: el objeto llega con
+              todos sus campos en <code>null</code> y no sale ningÃºn error. Y
+              usar <code>@Controller</code> en vez de
+              <code>@RestController</code>: Spring intentarÃ¡ buscar una vista
+              HTML en lugar de devolver JSON.
+            </p>
+          </div>
+        </section>
+
+        <section class="topic" id="t6">
+          <h2><span class="num">06</span>MÃ©todos HTTP y cÃ³digos de estado</h2>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr>
+                  <th>MÃ©todo</th>
+                  <th>AcciÃ³n (CRUD)</th>
+                  <th>Â¿Lleva body?</th>
+                  <th>Respuesta tÃpica</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>GET</code></td>
+                  <td>Leer (Read)</td>
+                  <td>No</td>
+                  <td><span class="st s2">200</span> OK</td>
+                </tr>
+                <tr>
+                  <td><code>POST</code></td>
+                  <td>Crear (Create)</td>
+                  <td>SÃ</td>
+                  <td><span class="st s2">201</span> Created</td>
+                </tr>
+                <tr>
+                  <td><code>PUT</code></td>
+                  <td>Reemplazar/actualizar todo (Update)</td>
+                  <td>SÃ</td>
+                  <td><span class="st s2">200</span> OK</td>
+                </tr>
+                <tr>
+                  <td><code>PATCH</code></td>
+                  <td>Actualizar una parte</td>
+                  <td>SÃ</td>
+                  <td><span class="st s2">200</span> OK</td>
+                </tr>
+                <tr>
+                  <td><code>DELETE</code></td>
+                  <td>Eliminar (Delete)</td>
+                  <td>No</td>
+                  <td><span class="st s2">204</span> No Content</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr>
+                  <th>CÃ³digo</th>
+                  <th>Significa</th>
+                  <th>CuÃ¡ndo lo devuelves</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="st s2">200</span></td>
+                  <td>OK</td>
+                  <td>Todo saliÃ³ bien y hay datos</td>
+                </tr>
+                <tr>
+                  <td><span class="st s2">201</span></td>
+                  <td>Created</td>
+                  <td>Se creÃ³ un recurso (POST)</td>
+                </tr>
+                <tr>
+                  <td><span class="st s2">204</span></td>
+                  <td>No Content</td>
+                  <td>Ã‰xito sin nada que devolver (DELETE)</td>
+                </tr>
+                <tr>
+                  <td><span class="st s4">400</span></td>
+                  <td>Bad Request</td>
+                  <td>Datos invÃ¡lidos (fallÃ³ una validaciÃ³n)</td>
+                </tr>
+                <tr>
+                  <td><span class="st s4">401</span></td>
+                  <td>Unauthorized</td>
+                  <td>No estÃ¡s autenticado (no hay token o es invÃ¡lido)</td>
+                </tr>
+                <tr>
+                  <td><span class="st s4">403</span></td>
+                  <td>Forbidden</td>
+                  <td>EstÃ¡s autenticado pero no tienes permiso (rol)</td>
+                </tr>
+                <tr>
+                  <td><span class="st s4">404</span></td>
+                  <td>Not Found</td>
+                  <td>El recurso no existe</td>
+                </tr>
+                <tr>
+                  <td><span class="st s4">409</span></td>
+                  <td>Conflict</td>
+                  <td>Conflicto, p. ej. email ya registrado</td>
+                </tr>
+                <tr>
+                  <td><span class="st s5">500</span></td>
+                  <td>Internal Server Error</td>
+                  <td>Error no controlado en el servidor</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout tip">
+            <b class="lbl">Truco para memorizar</b>
+            <p>
+              <strong>2xx</strong> = saliÃ³ bien Â· <strong>4xx</strong> = el
+              error es del <em>cliente</em> (enviÃ³ algo mal) Â·
+              <strong>5xx</strong> = el error es del <em>servidor</em> (tu
+              cÃ³digo fallÃ³).
+            </p>
+          </div>
+          <p>
+            <code>ResponseEntity&lt;T&gt;</code> te deja controlar
+            <strong>el cÃ³digo, los headers y el body</strong> de la respuesta:
+          </p>
+          <pre><code class="language-java">return ResponseEntity.ok(producto);                               // 200
+return ResponseEntity.status(HttpStatus.CREATED).body(producto);  // 201
+return ResponseEntity.noContent().build();                        // 204
+return ResponseEntity.notFound().build();                         // 404</code></pre>
+        </section>
+
+        <section class="topic" id="t7">
+          <h2><span class="num">07</span>DTOs (Data Transfer Objects)</h2>
+          <p>
+            Un DTO es una clase simple que define
+            <strong>quÃ© datos entran y salen</strong> de la API. La entidad
+            representa la tabla; el DTO representa lo que ve el cliente.
+          </p>
+          <p>
+            <strong>Â¿Por quÃ© no devolver la entidad directamente?</strong>
+          </p>
+          <ul>
+            <li>
+              <strong>Seguridad:</strong> la entidad <code>Usuario</code> tiene
+              <code>password</code>. Si la devuelves, se expone.
+            </li>
+            <li>
+              <strong>Control:</strong> el cliente no deberÃa poder enviar el
+              <code>id</code> o campos internos al crear.
+            </li>
+            <li>
+              <strong>Evitar bucles infinitos</strong> en relaciones
+              bidireccionales (tema 10).
+            </li>
+            <li>
+              <strong>Desacoplar:</strong> puedes cambiar la tabla sin romper la
+              API.
+            </li>
+          </ul>
+          <p class="file">
+            dto/ProductoRequest.java y dto/ProductoResponse.java
+          </p>
+          <pre><code class="language-java">// Lo que ENTRA (sin id: lo genera la BD)
+public record ProductoRequest(
+    @NotBlank String nombre,
+    @Positive Double precio,
+    @NotNull Long categoriaId
+) {}
+
+// Lo que SALE
+public record ProductoResponse(Long id, String nombre, Double precio, String categoria) {}</code></pre>
+          <p>ConversiÃ³n en el service (a mano o con un <em>mapper</em>):</p>
+          <pre><code class="language-java">private ProductoResponse toResponse(Producto p) {
+    return new ProductoResponse(p.getId(), p.getNombre(), p.getPrecio(),
+                                p.getCategoria().getNombre());
+}</code></pre>
+          <div class="callout tip">
+            <b class="lbl">Dato</b>
+            <p>
+              Un <code>record</code> (Java 16+) es una clase inmutable que
+              genera constructor, getters, <code>equals</code> y
+              <code>toString</code> automÃ¡ticamente. Ideal para DTOs. Con una
+              clase normal + Lombok (<code>@Data</code>) tambiÃ©n sirve.
+            </p>
+          </div>
+        </section>
+
+        <!-- BLOQUE 3 -->
+        <div class="block-title">Bloque 3 Â· Persistencia con JPA</div>
+
+        <section class="topic" id="t8">
+          <h2><span class="num">08</span>Entidades</h2>
+          <p>
+            <strong>JPA</strong> es la especificaciÃ³n (las reglas) para mapear
+            objetos Java a tablas. <strong>Hibernate</strong> es la
+            implementaciÃ³n que usa Spring por debajo. A esto se le llama
+            <strong>ORM</strong> (Object-Relational Mapping): una clase = una
+            tabla, un atributo = una columna, un objeto = una fila.
+          </p>
+          <p class="file">model/Producto.java</p>
+          <pre><code class="language-java">@Entity                                    // esta clase es una tabla
+@Table(name = "productos")                 // nombre de la tabla (opcional)
+public class Producto {
+
+    @Id                                    // llave primaria
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // autoincremental
+    private Long id;
+
+    @Column(nullable = false, length = 100)
+    private String nombre;
+
+    @Column(nullable = false)
+    private Double precio;
+
+    private Integer stock;                 // sin @Column: columna "stock" por defecto
+
+    public Producto() {}                   // JPA EXIGE un constructor vacÃo
+
+    // getters y setters...
+}</code></pre>
+          <div class="callout warn">
+            <b class="lbl">âš Error comÃºn</b>
+            <p>
+              Olvidar el constructor vacÃo o el <code>@Id</code>: la aplicaciÃ³n
+              ni siquiera arranca. Y ojo con los imports: deben venir de
+              <code>jakarta.persistence.*</code> (Spring Boot 3), no de
+              <code>javax.persistence</code>.
+            </p>
+          </div>
+        </section>
+
+        <section class="topic" id="t9">
+          <h2><span class="num">09</span>JpaRepository</h2>
+          <p>
+            Creas una <strong>interfaz</strong> (no una clase) que extiende
+            <code>JpaRepository&lt;Entidad, TipoDelId&gt;</code> y Spring genera
+            la implementaciÃ³n automÃ¡ticamente.
+          </p>
+          <p class="file">repository/ProductoRepository.java</p>
+          <pre><code class="language-java">public interface ProductoRepository extends JpaRepository&lt;Producto, Long&gt; {
+
+    // Query methods: Spring genera el SQL a partir del NOMBRE del mÃ©todo
+    List&lt;Producto&gt; findByNombreContainingIgnoreCase(String nombre);
+    List&lt;Producto&gt; findByPrecioLessThan(Double precio);
+    List&lt;Producto&gt; findByCategoriaId(Long categoriaId);
+    boolean existsByNombre(String nombre);
+
+    // Consulta personalizada en JPQL (se usan clases y atributos, no tablas)
+    @Query("SELECT p FROM Producto p WHERE p.stock &lt; :minimo")
+    List&lt;Producto&gt; conStockBajo(@Param("minimo") Integer minimo);
+}</code></pre>
+          <div class="tbl">
+            <table>
+              <thead>
+                <tr>
+                  <th>MÃ©todo heredado</th>
+                  <th>Devuelve</th>
+                  <th>QuÃ© hace</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>findAll()</code></td>
+                  <td><code>List&lt;T&gt;</code></td>
+                  <td>Trae todos los registros</td>
+                </tr>
+                <tr>
+                  <td><code>findById(id)</code></td>
+                  <td><code>Optional&lt;T&gt;</code></td>
+                  <td>Busca por id; puede no existir</td>
+                </tr>
+                <tr>
+                  <td><code>save(entidad)</code></td>
+                  <td><code>T</code></td>
+                  <td>Inserta si no tiene id, actualiza si ya tiene</td>
+                  ... (Restantes: 681 KB)
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
