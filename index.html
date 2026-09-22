@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Boot Master Quiz</title>
+<style>
+:root{--bg:#0b1020;--card:#121a2d;--muted:#9eabc4;--text:#eef3ff;--accent:#6ea8fe;--ok:#2ecc71;--bad:#ff5c5c;--border:#263453}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(135deg,#090e1a,#111a31);color:var(--text);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.container{max-width:1100px;margin:auto;padding:28px 18px 60px}.hero{padding:28px 0 20px}.hero h1{font-size:clamp(30px,5vw,52px);margin:0 0 8px}.hero p{color:var(--muted);max-width:800px}
+.grid{display:grid;grid-template-columns:280px 1fr;gap:18px}.card{background:rgba(18,26,45,.96);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.2)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}.stat{padding:12px;border:1px solid var(--border);border-radius:12px;background:#0e1628}.stat b{display:block;font-size:22px}.stat span{color:var(--muted);font-size:13px}
+select,button{font:inherit} select{width:100%;background:#0c1425;color:var(--text);border:1px solid var(--border);padding:10px;border-radius:10px;margin:6px 0 15px}
+.progress{height:9px;background:#0a1120;border-radius:99px;overflow:hidden;margin:10px 0 20px}.bar{height:100%;background:var(--accent);width:0;transition:.2s}
+.question{font-size:21px;font-weight:700;margin:4px 0 20px}.option{display:block;width:100%;text-align:left;padding:14px 15px;margin:10px 0;border:1px solid var(--border);border-radius:12px;background:#0e172a;color:var(--text);cursor:pointer;transition:.15s}.option:hover{border-color:var(--accent);transform:translateY(-1px)}.option:disabled{cursor:default}.option.correct{border-color:var(--ok);background:rgba(46,204,113,.15)}.option.wrong{border-color:var(--bad);background:rgba(255,92,92,.12)}
+.feedback{margin-top:16px;padding:13px;border-radius:12px;background:#0d1526;border:1px solid var(--border);display:none}.feedback.show{display:block}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}button{border:0;border-radius:10px;padding:11px 15px;background:var(--accent);color:#07101f;font-weight:700;cursor:pointer}button.secondary{background:#263453;color:var(--text)}button:disabled{opacity:.45;cursor:not-allowed}
+.topic{color:#9fc2ff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.review{margin-top:20px}.review-item{border-top:1px solid var(--border);padding:12px 0}.small{color:var(--muted);font-size:13px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="hero">
+    <h1>Spring Boot Master Quiz</h1>
+    <p>Banco de estudio amplio: Java/Spring, Boot, REST, arquitectura, JPA/Hibernate, SQL, validación, errores, Security/JWT, testing, configuración, Actuator, caché, Docker, microservicios y rendimiento.</p>
+  </div>
+
+  <div class="grid">
+    <aside class="card">
+      <div class="stats">
+        <div class="stat"><b id="score">0</b><span>Correctas</span></div>
+        <div class="stat"><b id="answered">0</b><span>Respondidas</span></div>
+        <div class="stat"><b id="percent">0%</b><span>Acierto</span></div>
+      </div>
+      <label>Filtrar por tema</label>
+      <select id="topicFilter"></select>
+      <label>Modo</label>
+      <select id="mode">
+        <option value="all">Todas</option>
+        <option value="wrong">Repasar incorrectas</option>
+        <option value="unanswered">No respondidas</option>
+      </select>
+      <button id="reset" class="secondary">Reiniciar progreso</button>
+      <div class="small" style="margin-top:15px">La respuesta correcta se marca inmediatamente después de responder.</div>
+    </aside>
+
+    <main class="card">
+      <div class="topic" id="topic"></div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="question" id="question"></div>
+      <div id="options"></div>
+      <div class="feedback" id="feedback"></div>
+      <div class="actions">
+        <button id="next" disabled>Siguiente →</button>
+        <button id="random" class="secondary">Pregunta aleatoria</button>
+      </div>
+      <div class="review" id="review"></div>
+    </main>
+  </div>
+</div>
+
+<script>
+const questions = [
+{t:"Spring / Fundamentos",q:"¿Qué problema resuelve principalmente la Inversión de Control (IoC) en Spring?",o:["Permite reemplazar SQL por JSON","Transfiere al framework la responsabilidad de crear y administrar objetos y sus dependencias","Convierte Java en JavaScript","Elimina la necesidad de clases"],a:1,e:"IoC permite que el contenedor de Spring administre la creación y composición de objetos."},
+{t:"Spring / Fundamentos",q:"¿Qué es un Bean de Spring?",o:["Una tabla SQL","Un objeto administrado por el contenedor de Spring","Un archivo de configuración","Una petición HTTP"],a:1,e:"Un Bean es un objeto cuya creación, configuración y ciclo de vida son gestionados por el contenedor."},
+{t:"Spring / Fundamentos",q:"¿Cuál es la ventaja principal de la inyección por constructor?",o:["Evita usar interfaces","Hace explícitas las dependencias y permite objetos más fáciles de probar e inmutables","Obliga a usar PostgreSQL","Elimina los Beans"],a:1,e:"El constructor deja claras las dependencias requeridas y facilita pruebas unitarias."},
+{t:"Spring / Fundamentos",q:"¿Qué anotación suele indicar una clase de lógica de negocio?",o:["@Service","@Entity","@RequestBody","@Table"],a:0,e:"@Service es un estereotipo de componente usado habitualmente para la capa de negocio."},
+{t:"Spring / Fundamentos",q:"¿Qué hace @Repository?",o:["Define un endpoint","Marca una clase/componente de acceso a datos y participa en la traducción de ciertas excepciones de persistencia","Genera JWT","Configura Docker"],a:1,e:"@Repository identifica la capa de persistencia y permite el soporte de traducción de excepciones de Spring."},
+{t:"Spring Boot",q:"¿Qué combina @SpringBootApplication?",o:["@Entity, @Repository y @Service","@Configuration, @EnableAutoConfiguration y @ComponentScan","@RestController, @Bean y @Autowired","@Controller, @RequestMapping y @Valid"],a:1,e:"La anotación compuesta reúne esas tres capacidades principales."},
+{t:"Spring Boot",q:"¿Qué ventaja caracteriza a Spring Boot?",o:["Elimina Java","Reduce configuración manual mediante auto-configuración y starters","Solo funciona con MySQL","No permite aplicaciones web"],a:1,e:"Spring Boot proporciona convenciones, starters, servidor embebido y auto-configuración para acelerar el desarrollo."},
+{t:"Spring Boot",q:"¿Qué archivo es típico en un proyecto Maven de Spring Boot?",o:["pom.xml","spring.json","boot.gradle","application.java"],a:0,e:"Maven utiliza pom.xml para dependencias, plugins y configuración del proyecto."},
+{t:"Spring Boot",q:"¿Para qué sirven los Spring Boot Starters?",o:["Son bases de datos","Agrupan dependencias comunes para una funcionalidad determinada","Son endpoints","Son clases Entity"],a:1,e:"Por ejemplo, spring-boot-starter-web reúne dependencias habituales para aplicaciones web."},
+{t:"REST / MVC",q:"¿Qué anotación se utiliza normalmente para un Controller que devuelve datos directamente en el cuerpo de la respuesta?",o:["@Controller","@RestController","@Service","@Repository"],a:1,e:"@RestController combina @Controller con comportamiento de respuesta mediante el body."},
+{t:"REST / MVC",q:"¿Qué anotación se utiliza para mapear una petición GET?",o:["@GetMapping","@ReadMapping","@FetchMapping","@HttpGet"],a:0,e:"@GetMapping es la anotación especializada para peticiones HTTP GET."},
+{t:"REST / MVC",q:"Para /users/42, ¿qué anotación permite obtener 42 si el método está mapeado como /users/{id}?",o:["@RequestParam","@RequestBody","@PathVariable","@Header"],a:2,e:"@PathVariable obtiene valores incluidos en la ruta."},
+{t:"REST / MVC",q:"Para /users?page=2, ¿qué anotación usarías para obtener page?",o:["@PathVariable","@RequestParam","@RequestBody","@CookieValue"],a:1,e:"Los query parameters se reciben normalmente con @RequestParam."},
+{t:"REST / MVC",q:"¿Qué anotación permite deserializar el JSON del body hacia un objeto Java?",o:["@RequestBody","@BodyParam","@JsonRequest","@RequestJson"],a:0,e:"@RequestBody indica que el cuerpo HTTP debe convertirse al objeto correspondiente."},
+{t:"REST / MVC",q:"¿Qué código HTTP indica normalmente que un recurso fue creado correctamente?",o:["200","201","204","304"],a:1,e:"201 Created es el estado habitual para una creación exitosa."},
+{t:"REST / MVC",q:"¿Qué código indica que el recurso solicitado no existe?",o:["400","401","404","409"],a:2,e:"404 Not Found indica que el recurso solicitado no fue encontrado."},
+{t:"REST / MVC",q:"¿Cuál es la diferencia general entre 401 y 403?",o:["401 es servidor caído y 403 es recurso inexistente","401 se relaciona con autenticación y 403 con acceso prohibido","Son idénticos","401 es validación y 403 es SQL"],a:1,e:"401 suele indicar que falta una autenticación válida; 403 que el acceso está prohibido para el usuario autenticado."},
+{t:"REST / MVC",q:"¿Qué verbo HTTP es idempotente y suele utilizarse para reemplazar una representación de un recurso?",o:["POST","PUT","PATCH","CONNECT"],a:1,e:"PUT se define normalmente como una operación idempotente de reemplazo/actualización."},
+{t:"Arquitectura",q:"En Controller → Service → Repository, ¿dónde suele residir la lógica de negocio?",o:["Controller","Service","Repository","DTO"],a:1,e:"La capa Service suele concentrar las reglas y operaciones de negocio."},
+{t:"Arquitectura",q:"¿Cuál es el objetivo principal de separar Controller, Service y Repository?",o:["Crear más archivos sin beneficio","Separar responsabilidades y facilitar mantenimiento, pruebas y evolución","Evitar usar interfaces","Hacer que SQL sea obligatorio"],a:1,e:"La separación reduce acoplamiento y mantiene cada capa enfocada en una responsabilidad."},
+{t:"Arquitectura",q:"¿Qué es un DTO?",o:["Database Table Object","Data Transfer Object","Dependency Type Object","Data Transaction Operation"],a:1,e:"DTO significa Data Transfer Object y sirve para transportar datos entre capas o sistemas."},
+{t:"Arquitectura",q:"¿Por qué puede ser útil no devolver directamente una Entity desde una API?",o:["Las Entities no pueden serializarse","Permite controlar el contrato expuesto y evitar filtrar campos o acoplar la API al modelo de persistencia","Porque JSON no acepta clases","Porque Spring lo prohíbe"],a:1,e:"Los DTOs permiten diseñar el contrato de la API independientemente del modelo interno."},
+{t:"JPA / Hibernate",q:"¿Qué significa JPA?",o:["Java Persistence API","Java Process Architecture","Java Protocol Adapter","JSON Persistence Application"],a:0,e:"JPA es la especificación de persistencia de Java."},
+{t:"JPA / Hibernate",q:"¿Qué es Hibernate?",o:["Un servidor HTTP","Una implementación ORM ampliamente usada de JPA","Un lenguaje de programación","Un sistema operativo"],a:1,e:"Hibernate es un proveedor ORM que implementa JPA y ofrece funcionalidades adicionales."},
+{t:"JPA / Hibernate",q:"¿Qué anotación marca una clase como entidad JPA?",o:["@Entity","@TableEntity","@Persistent","@JpaClass"],a:0,e:"@Entity indica que la clase es una entidad gestionada por JPA."},
+{t:"JPA / Hibernate",q:"¿Qué anotación identifica normalmente la clave primaria?",o:["@PrimaryKey","@Id","@Key","@Identifier"],a:1,e:"@Id identifica el atributo que representa la clave primaria de la entidad."},
+{t:"JPA / Hibernate",q:"¿Qué interfaz ofrece operaciones CRUD y paginación/ordenamiento en Spring Data JPA?",o:["JpaRepository","SqlRepository","DatabaseRepository","CrudService"],a:0,e:"JpaRepository hereda funcionalidades de repositorios de Spring Data y añade capacidades específicas de JPA."},
+{t:"JPA / Hibernate",q:"¿Qué método de JpaRepository se usa habitualmente para guardar una entidad?",o:["create()","insert()","save()","persistObject()"],a:2,e:"save() sirve para persistir o actualizar una entidad según su estado/identificador."},
+{t:"JPA / Hibernate",q:"¿Qué significa FetchType.LAZY?",o:["Carga relaciones siempre al arrancar","La relación se carga bajo demanda cuando se accede a ella","Desactiva Hibernate","Carga los datos en otro servidor"],a:1,e:"Lazy loading retrasa la carga de asociaciones hasta que son necesarias."},
+{t:"JPA / Hibernate",q:"¿Qué problema describe N+1 queries?",o:["Una consulta SQL inválida","Una consulta inicial que provoca muchas consultas adicionales al recorrer relaciones","Un problema de JWT","Una excepción de compilación"],a:1,e:"Una consulta para obtener N entidades puede disparar N consultas adicionales por relaciones, afectando al rendimiento."},
+{t:"JPA / Hibernate",q:"¿Qué anotación representa normalmente una relación muchos-a-uno?",o:["@ManyToOne","@ManyWithOne","@SeveralToOne","@MultipleToSingle"],a:0,e:"@ManyToOne modela que muchas entidades se relacionan con una entidad del otro lado."},
+{t:"JPA / Hibernate",q:"¿Para qué sirve @JoinColumn?",o:["Configura un Controller","Especifica la columna utilizada para una relación en la base de datos","Crea un JWT","Configura Maven"],a:1,e:"@JoinColumn permite especificar la columna de unión, normalmente una foreign key."},
+{t:"Validación",q:"¿Qué anotación se usa para validar que una cadena no sea nula, vacía ni contenga solo espacios?",o:["@NotNull","@NotEmpty","@NotBlank","@Required"],a:2,e:"@NotBlank aplica precisamente esa validación a cadenas."},
+{t:"Validación",q:"¿Qué anotación permite activar validaciones sobre un objeto recibido en un Controller?",o:["@Check","@Valid","@ValidateObject","@Validation"],a:1,e:"@Valid activa Bean Validation sobre el objeto anotado."},
+{t:"Validación",q:"¿Qué anotación valida normalmente un email?",o:["@Email","@Mail","@ValidEmail","@EmailAddressOnly"],a:0,e:"@Email comprueba que el valor tenga un formato de correo válido."},
+{t:"Excepciones",q:"¿Qué anotación permite manejar una excepción concreta en un Controller o Advice?",o:["@ExceptionHandler","@Catch","@HandleException","@ErrorHandler"],a:0,e:"@ExceptionHandler asocia una excepción con un método manejador."},
+{t:"Excepciones",q:"¿Qué anotación es apropiada para crear un manejador global de excepciones que devuelva respuestas REST?",o:["@RestControllerAdvice","@GlobalRestError","@RestExceptionManager","@ExceptionRest"],a:0,e:"@RestControllerAdvice combina las capacidades de ControllerAdvice y respuestas de cuerpo de forma REST."},
+{t:"Excepciones",q:"¿Por qué no conviene devolver stack traces al cliente en producción?",o:["Porque ocupan demasiados caracteres solamente","Porque pueden revelar detalles internos y sensibles de la aplicación","Porque JSON no los admite","Porque impiden usar HTTP"],a:1,e:"Los stack traces pueden revelar clases, rutas, consultas y otra información interna."},
+{t:"Seguridad",q:"¿Cuál es la diferencia entre autenticación y autorización?",o:["Autenticación determina identidad; autorización determina permisos","Son sinónimos","Autorización verifica contraseña y autenticación verifica roles","Solo una existe en Spring"],a:0,e:"Authentication responde quién eres; authorization qué puedes hacer."},
+{t:"Seguridad",q:"¿Qué framework se utiliza para seguridad en el ecosistema Spring?",o:["Spring Secure","Spring Security","Spring Auth Boot","Spring Protection"],a:1,e:"Spring Security proporciona autenticación, autorización y mecanismos de protección."},
+{t:"Seguridad",q:"¿Qué significa JWT?",o:["Java Web Transfer","JSON Web Token","Java JSON Type","JSON Web Transport"],a:1,e:"JWT significa JSON Web Token."},
+{t:"Seguridad",q:"¿Cómo se envía habitualmente un JWT en una petición HTTP?",o:["Token: <jwt>","Authorization: Bearer <jwt>","JWT-Password: <jwt>","Auth-JSON: <jwt>"],a:1,e:"El esquema Bearer se usa habitualmente en el header Authorization."},
+{t:"Seguridad",q:"¿Qué deberías hacer con una contraseña de usuario?",o:["Guardarla en texto plano","Almacenar un hash seguro mediante un password encoder adecuado","Ponerla dentro del JWT","Guardarla en el código fuente"],a:1,e:"Las contraseñas deben almacenarse como hashes seguros, no como texto plano."},
+{t:"Seguridad",q:"¿Qué es el Security Filter Chain?",o:["Una cadena de filtros que procesa peticiones para aplicar seguridad","Una cadena de SQL","Una colección de DTOs","Un sistema de caché"],a:0,e:"Spring Security procesa las peticiones mediante una cadena de filtros configurable."},
+{t:"Testing",q:"¿Qué framework se utiliza habitualmente para pruebas unitarias en Java?",o:["JUnit","JavaTest","SpringUnit","JTestPro"],a:0,e:"JUnit es el framework de testing más habitual en Java."},
+{t:"Testing",q:"¿Para qué se utiliza Mockito?",o:["Crear contenedores Docker","Crear mocks y simular dependencias durante pruebas","Gestionar SQL","Generar JWT"],a:1,e:"Mockito permite crear dobles de prueba y verificar interacciones con dependencias."},
+{t:"Testing",q:"¿Qué hace @Mock?",o:["Crea un mock de una dependencia","Inicia el servidor","Crea una Entity","Genera un Controller"],a:0,e:"@Mock crea una instancia simulada que puede inyectarse en el objeto bajo prueba."},
+{t:"Testing",q:"¿Qué anotación permite cargar el contexto completo de Spring Boot en una prueba?",o:["@SpringBootTest","@FullSpringTest","@IntegrationSpring","@BootTestAll"],a:0,e:"@SpringBootTest crea un entorno de prueba basado en el ApplicationContext de Spring Boot."},
+{t:"Testing",q:"¿Para qué se usa principalmente @WebMvcTest?",o:["Probar principalmente la capa MVC y Controllers","Probar Docker","Probar PostgreSQL directamente","Probar únicamente entidades"],a:0,e:"@WebMvcTest configura un slice enfocado en MVC."},
+{t:"Testing",q:"¿Para qué se usa principalmente @DataJpaTest?",o:["Probar componentes JPA y repositorios","Probar seguridad JWT","Probar Controllers","Probar Docker"],a:0,e:"@DataJpaTest configura un entorno enfocado en la capa de persistencia JPA."},
+{t:"Configuración",q:"¿Dónde se definen habitualmente propiedades de configuración?",o:["application.properties o application.yml","config.java solamente","spring.sql","pom.properties"],a:0,e:"Spring Boot admite ambos formatos para configuración externa."},
+{t:"Configuración",q:"¿Para qué sirven los Profiles?",o:["Para seleccionar configuraciones diferentes según el entorno","Para crear usuarios","Para reemplazar JPA","Para crear endpoints"],a:0,e:"Los perfiles permiten activar beans y configuraciones específicas, por ejemplo dev, test y prod."},
+{t:"Configuración",q:"¿Qué mecanismo es preferible para secretos de producción?",o:["Subir contraseñas al repositorio","Variables de entorno o un gestor de secretos","Ponerlos en DTOs","Escribirlos en Controllers"],a:1,e:"Los secretos deben gestionarse fuera del código fuente y del repositorio."},
+{t:"Configuración",q:"¿Qué ventaja tiene @ConfigurationProperties?",o:["Agrupa propiedades tipadas de configuración en una clase","Genera tablas","Crea endpoints","Reemplaza Spring Security"],a:0,e:"Permite mapear grupos de propiedades a objetos tipados y facilita configuración estructurada."},
+{t:"Transacciones",q:"¿Qué anotación se utiliza normalmente para demarcar una transacción?",o:["@Transaction","@Transactional","@AtomicTransaction","@DbTransaction"],a:1,e:"@Transactional permite declarar límites transaccionales."},
+{t:"Transacciones",q:"¿Qué significa atomicidad?",o:["Una transacción se aplica completamente o no se aplica","Cada consulta usa una conexión diferente","Los IDs son atómicos","Solo existe una tabla"],a:0,e:"Atomicidad es una propiedad ACID: la transacción se trata como una unidad."},
+{t:"Transacciones",q:"¿Qué es rollback?",o:["Confirmar cambios","Revertir cambios de una transacción","Crear una tabla","Reiniciar Spring"],a:1,e:"Rollback revierte cambios transaccionales cuando corresponde."},
+{t:"Rendimiento",q:"¿Qué técnica puede reducir consultas repetidas para datos que cambian poco?",o:["Caching","Duplicar Controllers","Eliminar DTOs","Desactivar HTTP"],a:0,e:"Una caché puede evitar accesos repetitivos a fuentes costosas cuando el caso de uso lo permite."},
+{t:"Rendimiento",q:"¿Qué anotación se utiliza para cachear el resultado de un método?",o:["@Cacheable","@Cached","@UseCache","@CacheResultOnly"],a:0,e:"@Cacheable permite almacenar y reutilizar el resultado según la clave de caché."},
+{t:"Rendimiento",q:"Una API devuelve 500.000 registros. ¿Qué estrategia es normalmente apropiada?",o:["Devolver siempre todo","Paginación, filtros y límites razonables","Crear 500.000 Controllers","Convertir cada registro en un endpoint"],a:1,e:"La paginación reduce tamaño de respuesta, memoria y carga de consultas."},
+{t:"Actuator",q:"¿Para qué sirve Spring Boot Actuator?",o:["Monitoreo y gestión de la aplicación mediante endpoints y métricas","Crear Entities","Reemplazar PostgreSQL","Generar JWT"],a:0,e:"Actuator expone información operativa como health, métricas y otros endpoints configurables."},
+{t:"Async / Scheduling",q:"¿Qué anotación permite programar una tarea periódica?",o:["@Scheduled","@Periodic","@CronTask","@TimerTask"],a:0,e:"@Scheduled permite ejecutar métodos siguiendo una expresión o intervalo configurado."},
+{t:"Async / Scheduling",q:"¿Qué anotación se utiliza para ejecutar métodos de forma asíncrona cuando la configuración correspondiente está habilitada?",o:["@Async","@Background","@Parallel","@Threaded"],a:0,e:"@Async delega la ejecución a un executor configurado."},
+{t:"Docker",q:"¿Qué es un contenedor Docker?",o:["Una máquina virtual completa obligatoriamente","Una instancia aislada de una imagen con el proceso y su entorno","Una base de datos","Un archivo Java"],a:1,e:"Un contenedor ejecuta una imagen en un entorno aislado a nivel de sistema operativo."},
+{t:"Docker",q:"¿Qué archivo suele definir cómo construir una imagen Docker?",o:["Dockerfile","Container.xml","docker.java","image.yml"],a:0,e:"Dockerfile contiene instrucciones para construir una imagen."},
+{t:"Docker",q:"¿Qué ventaja tiene Docker Compose para una API Spring Boot con PostgreSQL?",o:["Permite definir y ejecutar servicios relacionados como API y base de datos juntos","Reemplaza Java","Elimina SQL","Convierte REST en SOAP"],a:0,e:"Compose facilita definir múltiples servicios, redes, volúmenes y configuración."},
+{t:"Microservicios",q:"¿Qué es un API Gateway?",o:["Un punto de entrada que puede enrutar y aplicar políticas a llamadas hacia servicios","Una Entity","Un driver JDBC","Un test unitario"],a:0,e:"Un gateway puede centralizar routing, autenticación, rate limiting y otras preocupaciones transversales."},
+{t:"Microservicios",q:"¿Qué problema intenta mitigar un Circuit Breaker?",o:["Fallos en cascada cuando un servicio dependiente deja de responder correctamente","Errores de sintaxis Java","Duplicación de DTOs","Falta de tablas"],a:0,e:"Un circuit breaker puede abrir el circuito ante fallos y evitar llamadas repetitivas a un servicio degradado."},
+{t:"Microservicios",q:"¿Cuál es un reto típico de los microservicios?",o:["La complejidad distribuida y la observabilidad","Que no pueden usar HTTP","Que no pueden tener bases de datos","Que eliminan la necesidad de testing"],a:0,e:"Los sistemas distribuidos añaden problemas de red, consistencia, trazabilidad, despliegue y operación."},
+{t:"SQL / PostgreSQL",q:"¿Qué es una clave primaria?",o:["Una columna o conjunto de columnas que identifica de forma única una fila","Una contraseña","Una vista HTTP","Un Controller"],a:0,e:"La primary key identifica de manera única cada registro."},
+{t:"SQL / PostgreSQL",q:"¿Qué es una clave foránea?",o:["Una referencia a una clave de otra tabla que ayuda a representar relaciones","Una contraseña de PostgreSQL","Un índice obligatorio","Un JSON"],a:0,e:"Una foreign key representa una relación referencial entre tablas."},
+{t:"SQL / PostgreSQL",q:"¿Qué es un índice en una base de datos?",o:["Una estructura que puede acelerar determinadas consultas a cambio de espacio y coste de escritura","Una tabla de usuarios","Un endpoint","Un Bean"],a:0,e:"Los índices pueden mejorar lecturas, pero añaden almacenamiento y coste al modificar datos."},
+{t:"Diseño API",q:"¿Cuál es una práctica adecuada para un endpoint de listado grande?",o:["Soportar paginación y posiblemente ordenamiento/filtros","Devolver siempre todos los registros","Usar DELETE para listar","Enviar la base de datos completa"],a:0,e:"Paginación, filtros y ordenamiento ayudan a controlar coste y tamaño de respuesta."},
+{t:"Diseño API",q:"¿Qué característica ayuda a evitar cambios incompatibles para consumidores de una API?",o:["Versionado y contratos de API bien definidos","Eliminar DTOs","Usar variables globales","Desactivar validaciones"],a:0,e:"Versionar y gestionar contratos permite evolucionar APIs de forma controlada."},
+{t:"Java para Spring",q:"¿Por qué es importante conocer interfaces y polimorfismo para Spring?",o:["Facilitan desacoplar implementaciones y aprovechar inyección de dependencias","Porque Spring no usa clases","Porque sustituyen SQL","Porque son obligatorios para HTTP"],a:0,e:"Programar contra interfaces permite intercambiar implementaciones y facilita pruebas y diseño modular."},
+{t:"Java para Spring",q:"¿Qué colección representa normalmente una secuencia ordenada y permite duplicados?",o:["Set","Map","List","Optional"],a:2,e:"List mantiene orden y puede contener elementos duplicados."},
+{t:"Java para Spring",q:"¿Para qué sirve Optional principalmente?",o:["Representar explícitamente la posible ausencia de un valor y reducir ciertos null checks","Reemplazar todas las clases","Crear threads","Persistir entidades"],a:0,e:"Optional puede expresar ausencia/presencia de un valor, especialmente en APIs de retorno."},
+{t:"Java para Spring",q:"¿Qué aporta Stream API?",o:["Operaciones declarativas para procesar secuencias de datos","Una base de datos","Un servidor web","Un mecanismo JWT"],a:0,e:"Streams permiten operaciones como filter, map y collect sobre fuentes de datos."},
+{t:"Observabilidad",q:"¿Qué información es especialmente útil para diagnosticar una petición lenta?",o:["Latencia, logs, trazas, métricas y consultas SQL relevantes","Solo el nombre del Controller","El color del frontend","El nombre del proyecto"],a:0,e:"La observabilidad combina métricas, logs y trazas para entender comportamiento y latencia."},
+{t:"Buenas prácticas",q:"¿Qué principio ayuda a que una clase tenga una responsabilidad clara?",o:["Single Responsibility Principle","Global Controller Principle","Database First Rule","REST Only Principle"],a:0,e:"SRP promueve que una clase tenga una responsabilidad bien definida y un motivo principal de cambio."},
+{t:"Buenas prácticas",q:"¿Qué deberías evitar al diseñar una aplicación Spring Boot?",o:["Acoplar toda la lógica al Controller y mezclar persistencia, negocio y HTTP sin separación","Usar DTOs","Escribir pruebas","Validar entradas"],a:0,e:"Separar responsabilidades facilita mantenimiento, pruebas y evolución."},
+{t:"Buenas prácticas",q:"¿Qué es una dependencia circular?",o:["A depende de B y B depende directa o indirectamente de A","Dos endpoints tienen el mismo nombre","Una tabla tiene una primary key","Dos usuarios tienen el mismo email"],a:0,e:"Las dependencias circulares dificultan la creación de objetos y suelen indicar problemas de diseño."},
+{t:"Caso práctico",q:"Un usuario autenticado intenta eliminar un producto pero no tiene permiso ADMIN. ¿Qué concepto controla el acceso?",o:["Autorización","Serialización","Persistencia","Paginación"],a:0,e:"La autorización determina si una identidad autenticada tiene permiso para realizar una operación."},
+{t:"Caso práctico",q:"Un POST crea un pedido y además descuenta inventario. Si descontar inventario falla, quieres evitar guardar el pedido. ¿Qué herramienta es clave?",o:["Una transacción correctamente diseñada","Un DTO","@GetMapping","Un Controller adicional"],a:0,e:"Una transacción permite agrupar cambios para mantener una unidad de trabajo coherente."},
+{t:"Caso práctico",q:"Tu API devuelve una excepción LazyInitializationException al serializar una relación. ¿Qué debes investigar primero?",o:["El ciclo de vida de la sesión/transacción y el acceso lazy a la relación","El nombre del DTO únicamente","El puerto HTTP","Dockerfile exclusivamente"],a:0,e:"La excepción suele indicar que se intenta acceder a una asociación lazy fuera del contexto de persistencia apropiado."},
+{t:"Caso práctico",q:"Una aplicación realiza una consulta de usuarios y después una consulta por cada usuario para obtener sus roles. ¿Qué problema podría existir?",o:["N+1","CORS","JWT expirado","CSRF"],a:0,e:"El patrón una consulta inicial + una por cada elemento es característico de N+1."},
+{t:"Caso práctico",q:"Una API debe aceptar nombre y precio, pero nunca debe aceptar el ID enviado por el cliente para crear el recurso. ¿Qué diseño ayuda?",o:["Un Request DTO específico para creación","Devolver la Entity directamente","Usar @Entity en el JSON","Eliminar validaciones"],a:0,e:"Un DTO de entrada permite definir exactamente los campos aceptados por la operación."},
+{t:"Caso práctico",q:"Una consulta tarda mucho y el filtro usa una columna sin índice en una tabla enorme. ¿Qué podrías investigar?",o:["El plan de ejecución y si un índice adecuado mejora el acceso","Cambiar GET por POST siempre","Eliminar JPA","Crear más Controllers"],a:0,e:"El plan de ejecución y los índices son elementos fundamentales al investigar rendimiento SQL."},
+{t:"Caso práctico",q:"Necesitas mantener configuraciones diferentes para desarrollo y producción. ¿Qué usarías?",o:["Profiles y configuración externa","Dos clases Main obligatoriamente","Dos bases de código completamente separadas","DTOs"],a:0,e:"Profiles y configuración externa permiten activar valores y beans según el entorno."},
+{t:"Caso práctico",q:"Una dependencia externa puede tardar 30 segundos y bloquear recursos de tu API. ¿Qué debes considerar?",o:["Timeouts, límites, reintentos controlados y mecanismos de resiliencia","Quitar todos los logs","Convertir GET en DELETE","Desactivar validaciones"],a:0,e:"Los timeouts y patrones de resiliencia evitan que dependencias lentas degraden toda la aplicación."},
+{t:"Caso práctico",q:"Quieres verificar que un Controller devuelve 404 cuando un recurso no existe sin levantar toda la infraestructura. ¿Qué enfoque es apropiado?",o:["Un test MVC enfocado, por ejemplo con @WebMvcTest/MockMvc","Crear una imagen Docker para cada test","Usar solamente SQL manual","Probar únicamente el frontend"],a:0,e:"Los tests MVC permiten probar rutas, status y respuestas del Controller con un contexto acotado."}
+];
+
+let state=JSON.parse(localStorage.getItem("springQuizState")||"{}");
+let current=0, answeredThis=false;
+const $=id=>document.getElementById(id);
+const topics=[...new Set(questions.map(x=>x.t))];
+$("topicFilter").innerHTML='<option value="all">Todos los temas</option>'+topics.map(t=>`<option>${t}</option>`).join("");
+
+function filtered(){
+ const topic=$("topicFilter").value, mode=$("mode").value;
+ return questions.map((q,i)=>({...q,i})).filter(x=>
+   (topic==="all"||x.t===topic) &&
+   (mode==="all" || (mode==="wrong" && state[x.i]?.answered && state[x.i].correct===false) || (mode==="unanswered" && !state[x.i]?.answered))
+ );
+}
+function updateStats(){
+ let answered=0,correct=0;
+ Object.values(state).forEach(s=>{if(s.answered){answered++;if(s.correct)correct++;}});
+ $("score").textContent=correct;$("answered").textContent=answered;$("percent").textContent=answered?Math.round(correct/answered*100)+"%":"0%";
+}
+function render(){
+ const arr=filtered();
+ if(!arr.length){$("question").textContent="No hay preguntas en este filtro."; $("options").innerHTML="";$("feedback").classList.remove("show");$("next").disabled=true;$("bar").style.width="0";return;}
+ if(current>=arr.length) current=0;
+ const item=arr[current], saved=state[item.i];
+ $("topic").textContent=item.t;
+ $("question").textContent=(current+1)+". "+item.q;
+ $("bar").style.width=((current+1)/arr.length*100)+"%";
+ $("options").innerHTML=item.o.map((o,i)=>`<button class="option" data-i="${i}">${String.fromCharCode(65+i)}) ${o}</button>`).join("");
+ $("feedback").className="feedback";$("feedback").innerHTML="";
+ $("next").disabled=true;answeredThis=false;
+ if(saved?.answered) showAnswer(item,saved.choice,false);
+ document.querySelectorAll(".option").forEach(b=>b.addEventListener("click",()=>answer(item,+b.dataset.i)));
+ updateStats(); renderReview();
+}
+function showAnswer(item,choice,justAnswered){
+ const buttons=[...document.querySelectorAll(".option")];
+ buttons.forEach((b,i)=>{b.disabled=true;if(i===item.a)b.classList.add("correct");if(i===choice&&choice!==item.a)b.classList.add("wrong");});
+ const good=choice===item.a;
+ $("feedback").className="feedback show";
+ $("feedback").innerHTML=good?`<span class="ok"><b>✓ Correcto.</b></span> ${item.e}`:`<span class="bad"><b>✗ Incorrecto.</b></span> La respuesta correcta es <b>${String.fromCharCode(65+item.a)}) ${item.o[item.a]}</b>. ${item.e}`;
+ $("next").disabled=false;
+}
+function answer(item,choice){
+ state[item.i]={answered:true,choice,correct:choice===item.a};
+ localStorage.setItem("springQuizState",JSON.stringify(state));
+ showAnswer(item,choice,true); updateStats(); renderReview();
+}
+function renderReview(){
+ const entries=Object.entries(state).filter(([i,s])=>s.answered).slice(-8).reverse();
+ $("review").innerHTML=entries.length?`<h3>Últimas respuestas</h3>`+entries.map(([i,s])=>{
+  const q=questions[i];return `<div class="review-item"><b>${s.correct?"✓":"✗"} ${q.q}</b><div class="small">Tu opción: ${String.fromCharCode(65+s.choice)} · Correcta: ${String.fromCharCode(65+q.a)}</div></div>`;
+ }).join(""):"";
+}
+$("next").onclick=()=>{current++;render()};
+$("random").onclick=()=>{const arr=filtered();if(arr.length)current=Math.floor(Math.random()*arr.length);render()};
+$("topicFilter").onchange=()=>{current=0;render()};
+$("mode").onchange=()=>{current=0;render()};
+$("reset").onclick=()=>{if(confirm("¿Reiniciar todo el progreso?")){state={};localStorage.removeItem("springQuizState");current=0;render()}};
+render();
+</script>
+</body>
+</html>
